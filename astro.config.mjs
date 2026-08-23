@@ -1,12 +1,16 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
-import { site } from "./src/data/site";
+import { readFileSync } from "node:fs";
+
+const client = JSON.parse(
+  readFileSync(new URL("./src/data/client.json", import.meta.url), "utf-8"),
+);
 
 const pagesBase = process.env.PAGES_BASE;
 
 export default defineConfig({
-  site: pagesBase ? "https://jeanrk88.github.io" : site.seo.url,
-  base: pagesBase || "/",
+  site: client.pagesUrl || "https://example.github.io",
+  base: pagesBase || client.basePath || "/",
   output: "static",
   integrations: [sitemap()],
   build: { format: "directory" },

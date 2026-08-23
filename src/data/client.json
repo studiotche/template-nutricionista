@@ -1,0 +1,40 @@
+{
+  "business": {
+    "name": "Gladis Feldmann",
+    "category": "Nutricionista",
+    "phone": "+5551998158026",
+    "email": "",
+    "address": "Rua Albino Kern, 1719 - Sete de Setembro, Ivoti - RS",
+    "city": "Ivoti",
+    "state": "RS"
+  },
+  "gbp": {
+    "rating": 5,
+    "reviewCount": 7,
+    "mapsUrl": "https://www.google.com/maps/place/Nutricionista+Gladis+Feldmann/@-29.5959081,-51.1620319,17z"
+  },
+  "testimonials": [
+    { "author": "Neusa Bamberg", "rating": 5, "text": "Profissional muito competente, tirou todas minhas dúvidas. Nunca tive um atendimento nutricional com tamanha eficiência!", "date": "2026-07-22", "source": "google" },
+    { "author": "Gabrielli Arus Dorigon", "rating": 5, "text": "Excelente profissional!", "date": "2026-07-21", "source": "google" },
+    { "author": "Marcia Vier", "rating": 5, "text": "Estou imensamente agradecida pelo ótimo atendimento em seu consultório. Obrigada por toda atenção e carinho.", "date": "2026-07-15", "source": "google" },
+    { "author": "Suleide Maria Kaefer", "rating": 5, "text": "Muito bom. Sempre aprendendo mais um pouco.", "date": "2026-07-14", "source": "google" },
+    { "author": "Agda Erhart", "rating": 5, "text": "Gostei muito, muito atenciosa. Em busca de saúde intestinal!", "date": "2026-07-01", "source": "google" },
+    { "author": "Rubia Gomes", "rating": 5, "text": "Nutricionista maravilhosa.", "date": "2026-05-17", "source": "google" }
+  ],
+  "images": {
+    "desktop": "/images/nutricionista-ivoti-hero-gladis.webp",
+    "mobile": "/images/nutricionista-ivoti-gladis-hero-gladis-mobile.webp",
+    "about": "/images/nutricionista-ivoti-sobre-gladis.webp",
+    "logo": "/images/logo-gladisfeldmann.svg"
+  },
+  "brand": { "color": "#344126" },
+  "seo": {
+    "title": "Nutricionista em Ivoti e Estância Velha | Gladis Feldmann",
+    "description": "Nutricionista em Ivoti e Estância Velha, com consultas presenciais e online. Cuidado individualizado para uma alimentação possível e consciente.",
+    "keywords": ["nutricionista em Ivoti", "nutricionista Estância Velha"],
+    "locale": "pt-BR"
+  },
+  "basePath": "/lp-modelo-astro",
+  "pagesUrl": "https://studiotche.github.io/lp-modelo-astro/",
+  "generatedAt": "2026-08-23T00:00:00.000Z"
+}

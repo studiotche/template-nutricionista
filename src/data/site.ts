@@ -1,4 +1,6 @@
-export const site = {
+import clientJson from "./client.json";
+
+const siteDefaults = {
   name: "Gladis Feldmann",
   role: "Nutricionista",
   city: "Ivoti",
@@ -95,7 +97,7 @@ export const pillars = [
   ["Emocional", "Uma escuta acolhedora para compreender sua relação com a comida, sem culpa ou julgamentos."],
 ] as const;
 
-export const testimonials = [
+const testimonialDefaults = [
   { name: "Neusa Bamberg", date: "22/07/2026", dateTime: "2026-07-22", text: "Profissional muito competente, tirou todas minhas dúvidas. Nunca tive um atendimento nutricional com tamanha eficiência!" },
   { name: "Gabrielli Arus Dorigon", date: "21/07/2026", dateTime: "2026-07-21", text: "Excelente profissional!" },
   { name: "Marcia Vier", date: "15/07/2026", dateTime: "2026-07-15", text: "Estou imensamente agradecida pelo ótimo atendimento em seu consultório. Obrigada por toda atenção e carinho. Com certeza vai fazer muita diferença em minha vida." },
@@ -111,10 +113,10 @@ export const locations = [
   { city: "Atendimento online", address: "Consulta por videochamada", district: "De onde você estiver", type: "Online" },
 ] as const;
 
-export const faqs = [
+const faqDefaults = [
   ["Onde acontecem as consultas presenciais?", "Os atendimentos presenciais acontecem em Ivoti, na Rua Albino Kern, 1719, e em Estância Velha, na Avenida Brasil, 300, sala 209."],
   ["É possível consultar online?", "Sim. O atendimento online permite realizar a consulta com privacidade e conforto, de onde você estiver."],
-  ["Como faço para agendar?", `Clique em qualquer botão de agendamento para conversar diretamente pelo WhatsApp ${site.phoneDisplay}.`],
+  ["Como faço para agendar?", `Clique em qualquer botão de agendamento para conversar diretamente pelo WhatsApp ${siteDefaults.phoneDisplay}.`],
   ["O acompanhamento é personalizado?", "Sim. A proposta considera sua rotina, preferências, objetivos, histórico e contexto, evitando orientações genéricas."],
   // Confirmar com a profissional antes da publicação definitiva.
   ["Atende convênio?", "A consulta é particular, com emissão de nota fiscal. Você pode encaminhar a nota ao seu convênio para solicitar reembolso, conforme as regras do seu plano."],
@@ -128,4 +130,100 @@ export const faqs = [
   ["Como funciona o primeiro atendimento?", "O primeiro atendimento é uma conversa completa: história de saúde, rotina, preferências e objetivos. A partir dela, é construído um plano realista, em etapas."],
 ] as const;
 
-export const whatsappUrl = `https://wa.me/${site.phoneLink}?text=${encodeURIComponent("Olá, Nutri Gladis! Quero mais informações sobre as consultas.")}`;
+
+// ---------------------------------------------------------------------------
+// Camada de personalização: tudo que o Prospecta Leads preenche no client.json
+// sobrescreve os defaults acima. O que não vier no client.json mantém o valor
+// do template.
+// ---------------------------------------------------------------------------
+
+type Widen<T> = T extends string
+  ? string
+  : T extends readonly (infer U)[]
+    ? Widen<U>[]
+    : { -readonly [K in keyof T]: Widen<T[K]> };
+
+type ClientConfig = {
+  business?: {
+    name?: string;
+    category?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+  };
+  gbp?: { rating?: number; reviewCount?: number; mapsUrl?: string };
+  testimonials?: { author: string; rating: number; text: string; date?: string; source?: string }[];
+  faq?: { question: string; answer: string }[];
+  about?: { paragraphs?: string[] };
+  images?: { desktop?: string; mobile?: string; about?: string; logo?: string };
+  seo?: { title?: string; description?: string; keywords?: string[]; locale?: string };
+  basePath?: string;
+  pagesUrl?: string;
+};
+
+const client = clientJson as ClientConfig;
+
+const phoneDigits =
+  (client.business?.phone || "").replace(/\D/g, "") || siteDefaults.phoneLink.replace(/\D/g, "");
+
+export const site: Widen<typeof siteDefaults> = {
+  ...siteDefaults,
+  name: client.business?.name || siteDefaults.name,
+  role: client.business?.category || siteDefaults.role,
+  city: client.business?.city || siteDefaults.city,
+  state: client.business?.state || siteDefaults.state,
+  region: [client.business?.city, client.business?.state].filter(Boolean).join(" - ") || siteDefaults.region,
+  crn: "",
+  credentials: client.business?.category || siteDefaults.credentials,
+  phoneDisplay: client.business?.phone || siteDefaults.phoneDisplay,
+  phoneLink: phoneDigits,
+  telLink: `tel:+${phoneDigits}`,
+  googleProfile: client.gbp?.mapsUrl || siteDefaults.googleProfile,
+  mapsUrl: client.gbp?.mapsUrl || siteDefaults.mapsUrl,
+  seo: {
+    ...siteDefaults.seo,
+    title: client.seo?.title || siteDefaults.seo.title,
+    description: client.seo?.description || siteDefaults.seo.description,
+    url: client.pagesUrl || siteDefaults.seo.url,
+    ogImage: client.images?.desktop || siteDefaults.seo.ogImage,
+  },
+  hero: {
+    ...siteDefaults.hero,
+    title:
+      [client.business?.category, client.business?.city ? `em ${client.business.city}` : "", client.business?.name]
+        .filter(Boolean)
+        .join(", ") || siteDefaults.hero.title,
+    titleHighlight: client.business?.name || siteDefaults.hero.titleHighlight,
+    description: client.seo?.description || siteDefaults.hero.description,
+  },
+  about: {
+    ...siteDefaults.about,
+    paragraphs: client.about?.paragraphs?.length ? [...client.about.paragraphs] : [...siteDefaults.about.paragraphs],
+  },
+  assets: {
+    logo: client.images?.logo || siteDefaults.assets.logo,
+    hero: client.images?.desktop || siteDefaults.assets.hero,
+    heroMobile: client.images?.mobile || siteDefaults.assets.heroMobile,
+    about: client.images?.about || siteDefaults.assets.about,
+    processBg: client.images?.desktop || siteDefaults.assets.processBg,
+  },
+};
+
+export const testimonials = client.testimonials?.length
+  ? client.testimonials.map((t) => ({
+      name: t.author,
+      date: (t.date || "").split("-").reverse().join("/"),
+      dateTime: t.date || "",
+      text: t.text,
+    }))
+  : testimonialDefaults;
+
+export const faqs = client.faq?.length
+  ? client.faq.map((f) => [f.question, f.answer] as const)
+  : faqDefaults;
+
+export const whatsappUrl = `https://wa.me/${site.phoneLink}?text=${encodeURIComponent(
+  `Olá, ${site.name}! Quero mais informações sobre as consultas.`,
+)}`;

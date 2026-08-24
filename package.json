@@ -1,5 +1,5 @@
 {
-  "name": "template-nutricionista-local",
+  "name": "site-client-v2-landing-template",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.6.0",
-    "astro": "^6.0.0"
+    "astro": "^7.2.4"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",

@@ -1,55 +1,35 @@
 ---
 import "../styles/global.css";
-import { site } from "../data/site";
+import { asset, client, content, safeColor } from "../data/site";
 
-interface Props {
-  title?: string;
-  description?: string;
-}
-
-const { title = site.seo.title, description = site.seo.description } = Astro.props;
-const path = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
-const canonical = new URL(`/${path}`, site.seo.url);
-const preview = import.meta.env.PUBLIC_SITE_PREVIEW === "true";
-const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
+interface Props { title?: string; description?: string }
+const { title = content.seo.title, description = content.seo.description } = Astro.props;
+const canonical = client.canonical || undefined;
+const ogImagePath = client.assets?.og || client.assets?.heroDesktop;
+const ogImage = ogImagePath && canonical ? new URL(ogImagePath.replace(/^\//, ""), `${canonical}/`).toString() : asset(ogImagePath);
+const primary = safeColor(content.brand?.primary, "#164e63");
+const accent = safeColor(content.brand?.accent, "#0f766e");
 ---
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" style={`--sage-dark:${primary};--sage:${accent};--terracotta:${accent};--terracotta-deep:${primary}`}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/png" href={asset("/favicon-gladis.png")} />
-    <link rel="apple-touch-icon" href={asset("/favicon-gladis.png")} />
-    <link
-      rel="preload"
-      href={asset("/fonts/dm-sans.woff2")}
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href={asset("/fonts/newsreader.woff2")}
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <meta name="theme-color" content="#344126" />
-    <meta name="robots" content={preview ? "noindex,nofollow" : "index,follow"} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {client.assets?.logo && <link rel="icon" href={asset(client.assets.logo)} />}
+    <meta name="theme-color" content={primary} />
+    <meta name="robots" content={client.robots} />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="pt_BR" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={new URL(site.seo.ogImage, site.seo.url)} />
+    <meta property="og:title" content={content.seo.ogTitle || title} />
+    <meta property="og:description" content={content.seo.ogDescription || description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
     <meta name="twitter:card" content="summary_large_image" />
     <slot name="head" />
   </head>
-  <body>
-    <slot />
-  </body>
+  <body><slot /></body>
 </html>

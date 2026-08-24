@@ -1,620 +1,89 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import {
-  faqs,
-  locations,
-  pillars,
-  site,
-  specialties,
-  testimonials,
-  whatsappUrl,
-} from "../data/site";
+import { asset, business, client, content, differentiators, faqs, locationText, primaryContactUrl, reviews, services, telephoneUrl, whatsappUrl } from "../data/site";
 
-const asset = (path: string) =>
-  `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Person",
-      "@id": `${site.seo.url}/#person`,
-      name: `${site.role} ${site.name}`,
-      jobTitle: site.role,
-      url: site.seo.url,
-      image: `${site.seo.url}/images/nutricionista-ivoti-hero-gladis.webp`,
-      telephone: `+${site.phoneLink}`,
-      sameAs: [site.googleProfile],
-      areaServed: ["Ivoti", "Estância Velha", "Atendimento online"],
-      workLocation: locations.slice(0, 2).map((location) => ({
-        "@type": "Place",
-        name: `Consultório em ${location.city}`,
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: location.address.replace(" · sala 209", ", sala 209"),
-          addressLocality: location.city,
-          addressRegion: site.state,
-          addressCountry: "BR",
-        },
-      })),
-    },
-    {
-      "@type": "MedicalBusiness",
-      "@id": `${site.seo.url}/#medicalbusiness`,
-      name: `${site.role} ${site.name}`,
-      image: `${site.seo.url}/images/nutricionista-ivoti-hero-gladis.webp`,
-      telephone: `+${site.phoneLink}`,
-      priceRange: "$$",
-      medicalSpecialty: "Nutrition",
-      areaServed: ["Ivoti", "Estância Velha", "Vale do Sinos"],
-      location: locations.slice(0, 2).map((location) => ({
-        "@type": "Place",
-        name: `Consultório em ${location.city}`,
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: location.address.replace(" · sala 209", ", sala 209"),
-          addressLocality: location.city,
-          addressRegion: site.state,
-          addressCountry: "BR",
-        },
-      })),
-    },
-    {
-      "@type": "FAQPage",
-      "@id": `${site.seo.url}/#faq`,
-      mainEntity: faqs.map(([question, answer]) => ({
-        "@type": "Question",
-        name: question,
-        acceptedAnswer: { "@type": "Answer", text: answer },
-      })),
-    },
-    ...testimonials.map((testimonial) => ({
-      "@type": "Review",
-      itemReviewed: { "@id": `${site.seo.url}/#medicalbusiness` },
-      author: { "@type": "Person", name: testimonial.name },
-      datePublished: testimonial.dateTime,
-      reviewBody: testimonial.text,
-    })),
-  ],
-};
+const hasContact = Boolean(primaryContactUrl);
+const heroDesktop = asset(client.assets?.heroDesktop);
+const heroMobile = asset(client.assets?.heroMobile || client.assets?.heroDesktop);
+const aboutImage = asset(client.assets?.about);
+const logo = asset(client.assets?.logo);
+const ctaLabel = content.hero.primaryCta?.label || "Entrar em contato";
 ---
-
 <BaseLayout>
   <Fragment slot="head">
-    <link
-      rel="preload"
-      as="image"
-      href={asset(site.assets.hero)}
-      media="(min-width: 761px)"
-      fetchpriority="high"
-    />
-    <link
-      rel="preload"
-      as="image"
-      href={asset(site.assets.heroMobile)}
-      media="(max-width: 760px)"
-    />
-    <link rel="preload" as="image" href={asset(site.assets.logo)} />
-    <link rel="preload" as="image" href={asset("/images/whatsapp.webp")} />
-    <script
-      is:inline
-      type="application/ld+json"
-      set:html={JSON.stringify(jsonLd)}
-    />
+    {heroDesktop && <link rel="preload" as="image" href={heroDesktop} media="(min-width: 761px)" fetchpriority="high" />}
+    {heroMobile && <link rel="preload" as="image" href={heroMobile} media="(max-width: 760px)" />}
+    {client.jsonLd.map((schema) => <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />)}
   </Fragment>
   <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="#inicio" aria-label={`${site.name}, início`}
-        ><img
-          src={asset(site.assets.logo)}
-          alt={`${site.role} ${site.name}`}
-          width="205"
-          height="65"
-        /></a
-      >
+      <a class="brand" href="#inicio" aria-label={`${business.name}, início`}>
+        {logo ? <img src={logo} alt={business.name} width="205" height="65" /> : <strong>{business.name}</strong>}
+      </a>
       <nav class="desktop-nav" aria-label="Navegação principal">
-        <a href="#sobre">Sobre</a><a href="#atendimentos">Atendimentos</a><a
-          href="#metodo">Abordagem</a
-        ><a href="#depoimentos">Depoimentos</a><a href="#locais">Locais</a>
+        {content.about && <a href="#sobre">Sobre</a>}
+        {services.length > 0 && <a href="#servicos">Serviços</a>}
+        {reviews.length > 0 && <a href="#avaliacoes">Avaliações</a>}
+        {faqs.length > 0 && <a href="#duvidas">Dúvidas</a>}
       </nav>
-      <a
-        class="button button-small"
-        href={whatsappUrl}
-        target="_blank"
-        rel="noreferrer">Agendar consulta</a
-      >
-      <button
-        class="hamburger"
-        type="button"
-        aria-expanded="false"
-        aria-controls="mobileMenu"
-        aria-label="Abrir menu"><span></span><span></span><span></span></button
-      >
+      {hasContact && <a class="button button-small" href={primaryContactUrl} target={whatsappUrl ? "_blank" : undefined} rel="noreferrer">{ctaLabel}</a>}
+      <button class="hamburger" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Abrir menu"><span></span><span></span><span></span></button>
     </div>
   </header>
 
   <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
     <div class="mobile-menu-backdrop" data-close-menu></div>
     <div class="mobile-menu-panel">
-      <button
-        class="menu-close"
-        type="button"
-        data-close-menu
-        aria-label="Fechar menu"><span aria-hidden="true">✕</span></button
-      >
-      <div class="menu-panel-head">
-        <span class="menu-brand">Gladis Feldmann</span><small class="kicker"
-          >Nutricionista</small
-        >
-      </div>
+      <button class="menu-close" type="button" data-close-menu aria-label="Fechar menu"><span aria-hidden="true">×</span></button>
+      <div class="menu-panel-head"><span class="menu-brand">{business.name}</span>{business.category && <small class="kicker">{business.category}</small>}</div>
       <nav class="mobile-nav" aria-label="Navegação móvel">
-        <a href="#sobre">Sobre</a>
-        <a href="#atendimentos">Atendimentos</a>
-        <a href="#metodo">Abordagem</a>
-        <a href="#depoimentos">Depoimentos</a>
-        <a href="#locais">Locais</a>
+        {content.about && <a href="#sobre">Sobre</a>}
+        {services.length > 0 && <a href="#servicos">Serviços</a>}
+        {reviews.length > 0 && <a href="#avaliacoes">Avaliações</a>}
+        {faqs.length > 0 && <a href="#duvidas">Dúvidas</a>}
       </nav>
-      <a
-        class="button menu-cta"
-        href={whatsappUrl}
-        target="_blank"
-        rel="noreferrer">Agendar consulta <span aria-hidden="true">↗</span></a
-      >
+      {hasContact && <a class="button menu-cta" href={primaryContactUrl} target={whatsappUrl ? "_blank" : undefined} rel="noreferrer">{ctaLabel} <span aria-hidden="true">↗</span></a>}
     </div>
   </div>
 
   <main id="conteudo">
-    <section class="hero" id="inicio">
-      <div class="hero-visual">
-        <picture class="hero-bg">
-          <source
-            media="(max-width: 760px)"
-            srcset={asset(site.assets.heroMobile)}
-          />
-          <img
-            src={asset(site.assets.hero)}
-            alt="Nutricionista Gladis Feldmann em consultório, atendimento em Ivoti e Estância Velha"
-            width="1717"
-            height="916"
-            fetchpriority="high"
-          />
-        </picture>
-        <div class="floating-card">
-          <span class="floating-kicker">Cuidado individual</span><strong
-            >Sem fórmulas prontas.</strong
-          >
-        </div>
-      </div>
+    <section class:list={["hero", !heroDesktop && "hero-without-image"]} id="inicio">
+      {heroDesktop && <div class="hero-visual"><picture class="hero-bg"><source media="(max-width: 760px)" srcset={heroMobile} /><img src={heroDesktop} alt={content.media?.heroAlt || ""} width="1717" height="916" fetchpriority="high" /></picture></div>}
       <div class="hero-overlay" aria-hidden="true"></div>
       <div class="container hero-copy">
-        <p class="eyebrow eyebrow-light">{site.hero.eyebrow}</p>
-        <h1>
-          {site.hero.title.replace(site.hero.titleHighlight, "")}<span
-            class="highlight">{site.hero.titleHighlight}</span
-          >
-        </h1>
-        <p class="hero-tagline">{site.hero.tagline}</p>
-        <p class="lead">{site.hero.description}</p>
-        <div class="hero-actions">
-          <a class="button" href={whatsappUrl} target="_blank" rel="noreferrer"
-            >Agendar minha consulta <span aria-hidden="true">↗</span></a
-          >
-          <a class="text-link" href="#atendimentos"
-            >Como posso ajudar <span aria-hidden="true">↓</span></a
-          >
-        </div>
-        <div class="location-note">
-          <span class="location-dot" aria-hidden="true"></span><span
-            >Presencial em Ivoti e Estância Velha · Online</span
-          >
-        </div>
+        {content.hero.eyebrow && <p class="eyebrow eyebrow-light">{content.hero.eyebrow}</p>}
+        <h1>{content.hero.title}</h1>
+        <p class="lead">{content.hero.description}</p>
+        {hasContact && <div class="hero-actions"><a class="button" href={primaryContactUrl} target={whatsappUrl ? "_blank" : undefined} rel="noreferrer">{ctaLabel} <span aria-hidden="true">↗</span></a></div>}
+        {locationText && <div class="location-note"><span class="location-dot" aria-hidden="true"></span><span>{locationText}</span></div>}
       </div>
     </section>
 
-    <section class="trust-strip" aria-label="Diferenciais do atendimento">
-      <div class="container trust-grid">
-        <p><span>01</span> Escuta sem julgamentos</p><p>
-          <span>02</span> Estratégias personalizadas
-        </p><p><span>03</span> Presencial e online</p>
-      </div>
-    </section>
+    {differentiators.length > 0 && <section class="trust-strip" aria-label="Diferenciais"><div class="container trust-grid">{differentiators.map((item, index) => <p><span>{String(index + 1).padStart(2, "0")}</span> {item.title}</p>)}</div></section>}
 
-    <section class="section services-section" id="atendimentos">
-      <div class="container">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow eyebrow-light">Posso ajudar você</p><h2>
-              Cuidado nutricional para <span class="highlight"
-                >diferentes momentos da vida</span
-              >
-            </h2>
-          </div><p>
-            Cada acompanhamento começa pela sua história e respeita o
-            diagnóstico e os tratamentos conduzidos por outros profissionais.
-          </p>
-        </div>
-        <div class="service-grid">
-          {
-            specialties.map((specialty) => (
-              <article class="service-card">
-                <>
-                  <span class="service-number">{specialty.number}</span>
-                  <div>
-                    <>
-                      <h3>{specialty.title}</h3>
-                      <p>{specialty.text}</p>
-                      <p>{specialty.detail}</p>
-                    </>
-                  </div>
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={`Saber mais sobre ${specialty.title.toLowerCase()}`}
-                  >
-                    Saber mais <span aria-hidden="true">↗</span>
-                  </a>
-                </>
-              </article>
-            ))
-          }
-        </div>
-      </div>
-    </section>
+    {services.length > 0 && <section class="section services-section" id="servicos"><div class="container"><div class="section-heading"><div><p class="eyebrow eyebrow-light">Serviços confirmados</p><h2>Como podemos ajudar</h2></div></div><div class="service-grid">{services.map((service, index) => <article class="service-card"><span class="service-number">{String(index + 1).padStart(2, "0")}</span><div><h3>{service.name}</h3><p>{service.description}</p></div>{hasContact && <a href={primaryContactUrl} target={whatsappUrl ? "_blank" : undefined} rel="noreferrer">Mais informações <span aria-hidden="true">↗</span></a>}</article>)}</div></div></section>}
 
-    <section class="section process-section" id="metodo">
-      <img
-        class="process-bg"
-        src={asset(site.assets.processBg)}
-        alt=""
-        aria-hidden="true"
-        width="1754"
-        height="897"
-        loading="lazy"
-      />
-      <div class="container process-grid">
-        <div class="process-intro">
-          <p class="eyebrow">Abordagem integrada</p><h2>
-            Três pilares <span class="highlight">para cuidar</span> de você por inteiro
-          </h2><p>
-            A alimentação não acontece isolada da vida. Por isso, o
-            acompanhamento considera o que você come, como organiza seus hábitos
-            e como se relaciona com a comida.
-          </p><a
-            class="button"
-            href={whatsappUrl}
-            target="_blank"
-            rel="noreferrer"
-            >Iniciar meu acompanhamento <span aria-hidden="true">↗</span></a
-          >
-        </div>
-        <ol class="steps-list">
-          {
-            pillars.map(([title, text], index) => (
-              <li>
-                <>
-                  <span>0{index + 1}</span>
-                  <div>
-                    <>
-                      <h3>{title}</h3>
-                      <p>{text}</p>
-                    </>
-                  </div>
-                </>
-              </li>
-            ))
-          }
-        </ol>
-      </div>
-    </section>
+    {content.about && <section class="section about-section" id="sobre"><div class:list={["container", "about-grid", !aboutImage && "about-grid-text-only"]}>{aboutImage && <div class="about-media"><div class="image-frame about-frame"><img src={aboutImage} alt={content.media?.aboutAlt || ""} width="1122" height="1402" loading="lazy" /></div></div>}<div class="about-copy"><p class="eyebrow eyebrow-light">Sobre</p><h2>{content.about.heading}</h2><p>{content.about.body}</p>{hasContact && <a class="text-link text-link-dark" href={primaryContactUrl} target={whatsappUrl ? "_blank" : undefined} rel="noreferrer">Conversar agora <span aria-hidden="true">↗</span></a>}</div></div></section>}
 
-    <section class="section testimonials-section" id="depoimentos">
-      <div class="container">
-        <div class="testimonial-heading">
-          <div>
-            <p class="eyebrow">Transformando vidas</p><h2>
-              Experiências de <span class="highlight">quem já começou</span>
-            </h2>
-          </div>
-          <div>
-            <p>
-              Relatos de pacientes sobre o cuidado recebido durante o
-              acompanhamento nutricional.
-            </p><a
-              class="text-link text-link-dark"
-              href={site.googleProfile}
-              target="_blank"
-              rel="noreferrer"
-              >Ver perfil no Google <span aria-hidden="true">↗</span></a
-            >
-          </div>
-        </div>
-        <div class="testimonial-grid">
-          {
-            testimonials.map((testimonial) => (
-              <figure class="testimonial-card">
-                <>
-                  <span class="quote-mark" aria-hidden="true">
-                    “
-                  </span>
-                  <blockquote>{testimonial.text}</blockquote>
-                  <figcaption>
-                    <>
-                      <strong>{testimonial.name}</strong>
-                      <time datetime={testimonial.dateTime}>
-                        {testimonial.date}
-                      </time>
-                    </>
-                  </figcaption>
-                </>
-              </figure>
-            ))
-          }
-        </div>
-      </div>
-    </section>
+    {reviews.length > 0 && <section class="section testimonials-section" id="avaliacoes"><div class="container"><div class="testimonial-heading"><div><p class="eyebrow">Avaliações verificadas</p><h2>Experiências compartilhadas</h2></div></div><div class="testimonial-grid">{reviews.map((review) => <figure class="testimonial-card"><span class="quote-mark" aria-hidden="true">“</span><blockquote>{review.text}</blockquote><figcaption><strong>{review.author}</strong>{review.date && <time datetime={review.date}>{review.date}</time>}</figcaption></figure>)}</div></div></section>}
 
-    <section class="section about-section" id="sobre">
-      <div class="container about-grid">
-        <div class="about-media">
-          <div class="image-frame about-frame">
-            <img
-              src={asset(site.assets.about)}
-              alt="Nutricionista Gladis Feldmann em ambiente profissional com luz natural"
-              width="1122"
-              height="1402"
-              loading="lazy"
-            />
-          </div>
-          <div class="signature-card" aria-hidden="true">
-            <span>GF</span><small>cuidado em cada escolha</small>
-          </div>
-        </div>
-        <div class="about-copy">
-          <p class="eyebrow eyebrow-light">{site.about.eyebrow}</p><h2>
-            {site.about.title.replace(site.about.titleHighlight, "")}<span
-              class="highlight">{site.about.titleHighlight}</span
-            >
-          </h2>
-          {site.about.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
-          <p class="about-credentials">{site.credentials}</p>
-          <div class="about-values">
-            <div>
-              <strong>Consciência</strong><span
-                >para entender suas escolhas</span
-              >
-            </div><div>
-              <strong>Autonomia</strong><span>para cuidar de si com leveza</span
-              >
-            </div>
-          </div>
-          <a
-            class="text-link text-link-dark"
-            href={whatsappUrl}
-            target="_blank"
-            rel="noreferrer"
-            >Conversar com a nutricionista <span aria-hidden="true">↗</span></a
-          >
-        </div>
-      </div>
-    </section>
+    {faqs.length > 0 && <section class="section faq-section" id="duvidas"><div class="container faq-grid"><div><p class="eyebrow">Dúvidas frequentes</p><h2>Respostas objetivas</h2></div><div class="faq-list">{faqs.map((item, index) => <details open={index === 0}><summary>{item.question}<span aria-hidden="true">+</span></summary><p>{item.answer}</p></details>)}</div></div></section>}
 
-    <section class="section locations-section" id="locais">
-      <div class="container">
-        <div class="locations-heading">
-          <p class="eyebrow">Onde você pode me encontrar</p><h2>
-            Presencial ou online, com <span class="highlight"
-              >a mesma atenção</span
-            >
-          </h2>
-        </div>
-        <div class="locations-grid">
-          {
-            locations.map((location) => (
-              <article class="location-card">
-                <>
-                  <span class="kicker">{location.type}</span>
-                  <h3>{location.city}</h3>
-                  <p>
-                    <>
-                      <strong>{location.address}</strong>
-                      <small>{location.district}</small>
-                    </>
-                  </p>
-                </>
-              </article>
-            ))
-          }
-        </div>
-        <div class="locations-actions">
-          <a
-            class="text-link text-link-dark"
-            href={site.googleProfile}
-            target="_blank"
-            rel="noreferrer"
-            >Abrir localização no Google <span aria-hidden="true">↗</span></a
-          ><p>
-            WhatsApp: <a href={whatsappUrl} target="_blank" rel="noreferrer"
-              >{site.phoneDisplay}</a
-            >
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section faq-section" id="duvidas">
-      <div class="container faq-grid">
-        <div>
-          <p class="eyebrow">Dúvidas frequentes</p><h2>Antes de começar</h2><p
-            class="faq-intro"
-          >
-            Algumas respostas para deixar sua decisão mais tranquila.
-          </p>
-        </div>
-        <div class="faq-list">
-          {
-            faqs.map(([question, answer], index) => (
-              <details open={index === 0}>
-                <>
-                  <summary>
-                    {question}
-                    <span aria-hidden="true">+</span>
-                  </summary>
-                  <p>{answer}</p>
-                </>
-              </details>
-            ))
-          }
-        </div>
-      </div>
-    </section>
-
-    <section class="contact-section" id="contato">
-      <div class="container contact-card">
-        <div>
-          <p class="eyebrow eyebrow-light">Agende sua consulta</p><h2>
-            Sua transformação pode começar por <span class="highlight"
-              >uma conversa</span
-            >
-          </h2>
-        </div><div class="contact-details">
-          <p><span>Modalidades</span><strong>Presencial e online</strong></p><p>
-            <span>WhatsApp</span><strong>{site.phoneDisplay}</strong>
-          </p><p>
-            <span>Telefone</span><strong
-              ><a class="contact-tel" href={site.telLink}>{site.phoneDisplay}</a
-              ></strong
-            >
-          </p><a
-            class="button button-light"
-            href={whatsappUrl}
-            target="_blank"
-            rel="noreferrer"
-            >Falar com Gladis <span aria-hidden="true">↗</span></a
-          >
-        </div>
-      </div>
-    </section>
-
-    <section class="section map-section" id="mapa">
-      <div class="container map-grid">
-        <div class="map-copy">
-          <p class="eyebrow">Como chegar</p>
-          <h2>
-            Encontre o <span class="highlight">consultório</span> para sua consulta
-          </h2>
-          <p>
-            Os atendimentos presenciais acontecem em dois endereços no Vale do
-            Sinos, com a mesma atenção e cuidado em ambos.
-          </p>
-          <ul class="map-addresses">
-            {
-              locations.slice(0, 2).map((location) => (
-                <li>
-                  <span class="kicker">{location.city}</span>
-                  <strong>{location.address}</strong>
-                  <small>{location.district}</small>
-                </li>
-              ))
-            }
-          </ul>
-          <a
-            class="text-link text-link-dark"
-            href={site.mapsUrl}
-            target="_blank"
-            rel="noreferrer"
-            >Ver rotas no Google Maps <span aria-hidden="true">↗</span></a
-          >
-        </div>
-        <div class="map-frame">
-          <iframe
-            src={site.mapsEmbedUrl}
-            title="Mapa do consultório da nutricionista Gladis Feldmann em Ivoti"
-            loading="lazy"
-            allowfullscreen
-            referrerpolicy="no-referrer-when-downgrade"></iframe>
-        </div>
-      </div>
-    </section>
+    {(hasContact || locationText) && <section class="contact-section" id="contato"><div class="container contact-card"><div><p class="eyebrow eyebrow-light">Contato</p><h2>Fale com {business.name}</h2></div><div class="contact-details">{locationText && <p><span>Localização</span><strong>{locationText}</strong></p>}{business.phone && <p><span>Telefone</span><strong><a class="contact-tel" href={telephoneUrl}>{business.phone}</a></strong></p>}{business.email && <p><span>E-mail</span><strong><a href={`mailto:${business.email}`}>{business.email}</a></strong></p>}{hasContact && <a class="button button-light" href={primaryContactUrl} target={whatsappUrl ? "_blank" : undefined} rel="noreferrer">{ctaLabel} <span aria-hidden="true">↗</span></a>}</div></div></section>}
   </main>
 
-  <footer class="site-footer">
-    <div class="container footer-main logo">
-      <img
-        src={asset(site.assets.logo)}
-        alt={`${site.role} ${site.name}`}
-        width="205"
-        height="65"
-      /><p>
-        Atendimento nutricional presencial em Ivoti e Estância Velha, RS, e
-        consultas online.
-      </p><div class="footer-links">
-        <a href={site.telLink}>Ligar: {site.phoneDisplay}</a><a href="#inicio"
-          >Voltar ao início ↑</a
-        >
-      </div>
-    </div>
-    <div class="container footer-bottom">
-      <span
-        >© {new Date().getFullYear()}
-        {site.name} · {site.role} · CRN
-        {site.crn}</span
-      ><span class="footer-credit"
-        ><img
-          src={asset("/images/logo-studiotche.webp")}
-          alt="Studio Tchê"
-          width="512"
-          height="515"
-        />Desenvolvido por
-        <a href="https://studiotche.com" target="_blank" rel="noreferrer"
-          >Studio Tchê</a
-        >
-        ©</span
-      >
-    </div>
-  </footer>
-  <a
-    class="floating-whatsapp"
-    href={whatsappUrl}
-    target="_blank"
-    rel="noreferrer"
-    aria-label="Olá, Nutri Gladis! Quero mais informações sobre as consultas."
-  >
-    <img src={asset("/images/whatsapp.webp")} alt="" width="34" height="34" />
-  </a>
+  <footer class="site-footer"><div class="container footer-main logo">{logo ? <img src={logo} alt={business.name} width="205" height="65" /> : <strong>{business.name}</strong>}<p>{content.seo.description}</p><div class="footer-links">{business.phone && <a href={telephoneUrl}>{business.phone}</a>}<a href="#inicio">Voltar ao início ↑</a></div></div><div class="container footer-bottom"><span>© {new Date().getFullYear()} {business.name}</span><span class="footer-credit">Conteúdo revisado antes da publicação</span></div></footer>
+  {whatsappUrl && <a class="floating-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label={`Falar com ${business.name} pelo WhatsApp`}><img src={asset("/images/whatsapp.webp")} alt="" width="34" height="34" /></a>}
 </BaseLayout>
 
 <script>
   const hamburger = document.querySelector<HTMLButtonElement>(".hamburger");
   const menu = document.getElementById("mobileMenu");
-
   if (hamburger && menu) {
-    const close = () => {
-      menu.classList.remove("open");
-      menu.setAttribute("aria-hidden", "true");
-      hamburger.setAttribute("aria-expanded", "false");
-      document.body.classList.remove("menu-open");
-      hamburger.focus();
-    };
-    const open = () => {
-      menu.classList.add("open");
-      menu.setAttribute("aria-hidden", "false");
-      hamburger.setAttribute("aria-expanded", "true");
-      document.body.classList.add("menu-open");
-    };
-
-    hamburger.addEventListener("click", () => {
-      menu.classList.contains("open") ? close() : open();
-    });
-    menu
-      .querySelectorAll("[data-close-menu]")
-      .forEach((el) => el.addEventListener("click", close));
-    menu
-      .querySelectorAll(".mobile-nav a")
-      .forEach((link) => link.addEventListener("click", close));
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && menu.classList.contains("open")) close();
-    });
+    const close = () => { menu.classList.remove("open"); menu.setAttribute("aria-hidden", "true"); hamburger.setAttribute("aria-expanded", "false"); document.body.classList.remove("menu-open"); };
+    hamburger.addEventListener("click", () => { const opening = !menu.classList.contains("open"); menu.classList.toggle("open", opening); menu.setAttribute("aria-hidden", String(!opening)); hamburger.setAttribute("aria-expanded", String(opening)); document.body.classList.toggle("menu-open", opening); });
+    menu.querySelectorAll("[data-close-menu], .mobile-nav a").forEach((element) => element.addEventListener("click", close));
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") close(); });
   }
 </script>

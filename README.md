@@ -1,30 +1,8 @@
-# Template Astro — Nutricionista local
+# SiteClientV2 landing template
 
-Modelo estático, responsivo e reutilizável para sites de nutricionistas, com SEO local, dados estruturados e foco em conversão pelo WhatsApp.
+Template Astro para landing pages publicadas pelo Prospecta Leads. O build consome exclusivamente `src/data/client.json` no schema `SiteClientV2` aprovado; não há conteúdo de cliente, serviço, credencial, localização ou depoimento como fallback.
 
-## Personalização rápida
-
-1. Edite `src/data/site.ts` com nome, cidades, telefone, textos, especialidades, depoimentos e URL final.
-2. Substitua os arquivos `logo-gladisfeldmann.svg`, `hero-gladis.webp` e `sobre-gladis.webp` em `public/images`.
-3. Substitua `public/favicon-gladis.png` e atualize o monograma `GF` em `src/pages/index.astro`.
-4. Ajuste a URL do sitemap em `public/robots.txt`.
-5. Confirme dados profissionais, endereço, telefone e especialidades diretamente com a nutricionista.
-
-## Desenvolvimento
-
-```bash
-npm install
-npm run dev
-```
-
-## Build e Cloudflare Pages
-
-```bash
-npm run build
-```
-
-- Comando de build: `npm run build`
-- Diretório de saída: `dist`
-- Para um link temporário, defina `PUBLIC_SITE_PREVIEW=true` para gerar `noindex,nofollow`.
-
-O conteúdo evita promessas clínicas e especialidades não confirmadas. Antes da publicação definitiva, valide o JSON-LD e envie o sitemap no Google Search Console.
+- Seções vazias não são renderizadas.
+- Reviews aceitas precisam ter `source: google` e `evidenceId`.
+- Canonical, robots, sitemap, assets e JSON-LD vêm do manifesto determinístico do servidor.
+- O deploy é disparado uma única vez por `push`.
